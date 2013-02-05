@@ -291,6 +291,32 @@ The alist consists of pairs of field-name and field-value, such as
 			   (cons (match-string 1 line) (match-string 2 line))))
 		       header-lines))))))
 
+(defun gmail-simple-reader ()
+  "Makes a simple reader for gmail. Hitting ENTER on a line will take your browser to that page"
+  (interactive)
+  (let ( (thebuffer (get-buffer-create "*Simple Gmail Reader*")))
+    (with-current-buffer thebuffer
+      (delete-region (point-min) (point-max))
+      (mapcar
+       (lambda (entry)
+         (insert-string
+         (propertize 
+          (format "%s    %-20s    %s    %s\n"
+           (cadr (assoc 'date entry))
+           (cadr (assoc 'author entry))
+           (cadr (assoc 'title entry))
+           (cadr (assoc 'summary entry))
+           )
+          'link (assoc 'link entry)
+          ))
+         )
+       gmail-notifier-unread-entries
+              )
+      (local-set-key (kbd "<return>") (lambda () (interactive) (browse-url (cadr  (get-text-property (point) 'link)))))
+      )
+    (switch-to-buffer thebuffer)
+    )
+  )
 
 (provide 'gmail-notifier)
 ;;; gmail-notifier.el ends here
